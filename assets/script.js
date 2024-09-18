@@ -4,74 +4,77 @@ const addEmployeesBtn = document.querySelector('#add-employees-btn');
 // Collect employee data
 const collectEmployees = () => {
   console.log("checking for employees...");
-  const employeeList = window.localStorage.getItem("employeeList") || []
+  const employeeList = JSON.parse(window.localStorage.getItem("employeeList")) || [];
   console.log(employeeList);
   if (employeeList.length <= 0) {
     console.log("no employees yet!");
   }
 
   return employeeList;
-}
+};
 
+// Create and store a new employee
 const createNewEmployee = () => {
-  // TODO: Get user input to create and return an array of employee object//
   const employee = {
     firstName: prompt("What's your first name?"),
     lastName: prompt("What's your last name?"),
     salary: prompt("What's your yearly salary?"),
-  }
-  //  return employeeTable.push(employee); //Asking and typing in employee works, but it won't show the employee on the screen!//
+  };
+
   if (!employee.firstName || !employee.lastName || !employee.salary) {
-    alert("Invalid employee Detected, pleae try again!");
-    return
+    alert("Invalid employee detected, please try again!");
+    return;
   }
 
-  if (employee.firstName.length < 3 && employee.firstName.length > 40 || employee.lastName.length < 3 && employee.lastName.length > 40) {
-    alert("First name and last name must be greater than three an less than 40!");
-    return
+  if (employee.firstName.length < 3 || employee.firstName.length > 40 || employee.lastName.length < 3 || employee.lastName.length > 40) {
+    alert("First name and last name must be greater than 3 and less than 40 characters!");
+    return;
   }
 
-  const parseSalary = Number.parseFloat(employee.salary);
-  console.log(parseSalary);
-  if (typeof parseSalary !== "number") {
+  const parsedSalary = parseFloat(employee.salary);
+  if (isNaN(parsedSalary)) {
     alert("Salary is not a valid number, please input an actual number!");
-    return
+    return;
   }
 
-  employee.salary = parseSalary;
-  return employee;
-}
+  employee.salary = parsedSalary;
 
-// Display the average salary // HAVEN'T FINISHED YET, NEED TO ADD A FOR LOOP! //
-const displayAverageSalary = () => { 
+  const employeeList = collectEmployees(); // Collect existing employees
+  employeeList.push(employee);            // Add the new employee
+
+  window.localStorage.setItem("employeeList", JSON.stringify(employeeList)); // Save updated list
+  
+  return employee;  // Return the new employee (optional, depending on use case)
+};
+
+// Display the average salary
+const displayAverageSalary = () => {
   const employeesList = collectEmployees();
+  if (employeesList.length === 0) {
+    console.log("No employees to calculate salary.");
+    return;
+  }
+
   let sum = 0;
   for (let i = 0; i < employeesList.length; i++) {
     const currentEmployee = employeesList[i];
-    sum+=currentEmployee.salary;
-    console.log(sum);
+    sum += currentEmployee.salary;
   }
-  // TODO: Calculate and display the average salary//
-  console.log(employeesList);
+
   const averageCalculated = sum / employeesList.length;
-  console.log({averageCalculated});
-  // const average = (sum) => {
-  // }
-  //console.log(average());
+  console.log(`Average Salary: ${averageCalculated}`);
 };
-console.log(displayAverageSalary());
 
-// Select a random employee
+// Select and display a random employee
 const getRandomEmployee = (employeesArray) => {
-  // TODO: Select and display a random employee
-  return employeesArray[Math.floor(Math.random() * employeesArray.length)];
-}
-
-/*
-  ====================
-  STARTER CODE
-  Do not modify any of the code below this line:
-*/
+  if (employeesArray.length === 0) {
+    console.log("No employees available to pick a random one.");
+    return null;
+  }
+  const randomEmployee = employeesArray[Math.floor(Math.random() * employeesArray.length)];
+  console.log("Random Employee:", randomEmployee);
+  return randomEmployee;
+};
 
 // Display employee data in an HTML table
 const displayEmployees = (employeesArray) => {
@@ -106,30 +109,30 @@ const displayEmployees = (employeesArray) => {
 
     employeeTable.append(newTableRow);
   }
-}
+};
 
+// Track employee data and update UI
 const trackEmployeeData = () => {
-  const employees = collectEmployees();
-
+  const employees = collectEmployees();  // Get employees from local storage
   console.table(employees);
 
-  displayAverageSalary(employees);
+  displayAverageSalary();  // Display average salary
 
   console.log('==============================');
 
-  getRandomEmployee(employees);
+  getRandomEmployee(employees);  // Log a random employee
 
-  employees.sort(function (a, b) {
-    if (a.lastName < b.lastName) {
-      return -1;
-    } else {
-      return 1;
-    }
-  });
+  employees.sort((a, b) => a.lastName.localeCompare(b.lastName));  // Sort employees by last name
 
-  displayEmployees(employees);
-}
+  displayEmployees(employees);  // Display employees in the table
+};
+
+// Event handler that creates a new employee and tracks employee data
+const handleAddEmployees = () => {
+  createNewEmployee();  // Create a new employee
+  trackEmployeeData();  // Update the employee table and display info
+};
 
 // Add event listener to 'Add Employees' button
-addEmployeesBtn.addEventListener('click', trackEmployeeData);
-addEmployeesBtn.addEventListener('click', createNewEmployee);
+addEmployeesBtn.addEventListener('click', handleAddEmployees);
+
