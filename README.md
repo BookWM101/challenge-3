@@ -1,4 +1,4 @@
-# Simple Portfolio
+# Simple Payroll Manager
 
 ## Description:
 A simple employee payroll manager.
